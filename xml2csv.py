@@ -18,6 +18,14 @@ import csv
 import argparse
 from collections import Counter
 from time import sleep
+import datetime
+
+def output_last_seen_date():
+    now_date = f"datetime.datetime.now()"
+    last_seen_date = f"now_date.year" + "-" + f"now_date.month"
+    return(last_seen_date)
+
+    last_seen = output_last_seen_date()
 
 def get_host_data(root):
     """Traverses the xml tree and build lists of scan information
@@ -39,6 +47,17 @@ def get_host_data(root):
             host_name = host_name_element[0].findall('hostname')[0].attrib['name']
         except IndexError:
             host_name = ''
+        
+        # Get MAC ID and Vendor Info
+        mac_id = ''
+        mac_vendor = ''
+        #if host.findall('address')[1].attrib['addrtype'] == 'mac':
+        if host.findall('status')[0].attrib['reason'] == 'arp-response':
+            mac_id = host.findall('address')[1].attrib['addr']
+            try:
+                mac_vendor = host.findall('address')[1].attrib['vendor']
+            except KeyError:
+                mac_vendor = ''
         
         # If we only want the IP addresses from the scan, stop here
         if args.ip_addresses:
@@ -90,9 +109,8 @@ def get_host_data(root):
                     script_output = ''
 
                 # Create a list of the port data
-                port_data.extend((ip_address, host_name, os_name,
-                                  proto, port_id, service, product, 
-                                  servicefp, script_id, script_output))
+                port_data.extend((ip_address, host_name, mac_id, mac_vendor, os_name,
+                                  proto, port_id, service, last_seen))
                 
                 # Add the port data to the host data
                 host_data.append(port_data)
@@ -126,7 +144,7 @@ def parse_to_csv(data):
         top_row = [
             'IP', 'Host', 'OS', 'Proto', 'Port',
             'Service', 'Product', 'Service FP',
-            'NSE Script ID', 'NSE Script Output', 'Notes'
+            'NSE Script ID', 'NSE Script Output', 'First Seen', 'Last Seen', 'Notes'
         ]
         csv_writer.writerow(top_row)
         print('\n[+] The file {} does not exist. New file created!\n'.format(
