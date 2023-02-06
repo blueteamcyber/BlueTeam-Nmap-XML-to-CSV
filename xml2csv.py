@@ -21,11 +21,11 @@ from time import sleep
 import datetime
 
 def output_last_seen_date():
-    now_date = f"datetime.datetime.now()"
-    last_seen_date = f"now_date.year" + "-" + f"now_date.month"
+    now_date = datetime.datetime.now()
+    last_seen_date = f'{now_date.strftime("%Y")}-{now_date.strftime("%b")}-{now_date.strftime("%d")}'
     return(last_seen_date)
 
-    last_seen = output_last_seen_date()
+last_seen = output_last_seen_date()
 
 def get_host_data(root):
     """Traverses the xml tree and build lists of scan information
@@ -142,9 +142,8 @@ def parse_to_csv(data):
         csv_file = open(csv_name, 'w', newline='')
         csv_writer = csv.writer(csv_file)
         top_row = [
-            'IP', 'Host', 'OS', 'Proto', 'Port',
-            'Service', 'Product', 'Service FP',
-            'NSE Script ID', 'NSE Script Output', 'First Seen', 'Last Seen', 'Notes'
+            'IP', 'Host', 'MAC ID', 'Vendor', 'OS', 'Protocol', 'Port',
+            'Service', 'Last Seen', 'First Seen', 'System Type', 'System Purpose', 'Notes'
         ]
         csv_writer.writerow(top_row)
         print('\n[+] The file {} does not exist. New file created!\n'.format(
